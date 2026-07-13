@@ -44,7 +44,12 @@ async def calculate_total_revenue(
     else:
         session_context = db_session
 
-    query = text("""
+    date_filter = """
+                AND r.check_in_date >= (CAST(:period_start AS timestamp) AT TIME ZONE p.timezone)
+                AND r.check_in_date < (CAST(:period_end AS timestamp) AT TIME ZONE p.timezone)
+    """ if month else ""
+
+    query = text(f"""
             SELECT
                 r.currency,
                 COALESCE(SUM(r.total_amount), 0) AS total_revenue,
@@ -53,19 +58,13 @@ async def calculate_total_revenue(
             LEFT JOIN reservations r
                 ON r.property_id = p.id
                 AND r.tenant_id = p.tenant_id
-                AND (
-                    :month IS NULL OR (
-                        r.check_in_date >= (CAST(:period_start AS timestamp) AT TIME ZONE p.timezone)
-                        AND r.check_in_date < (CAST(:period_end AS timestamp) AT TIME ZONE p.timezone)
-                    )
-                )
+                {date_filter}
             WHERE p.id = :property_id AND p.tenant_id = :tenant_id
             GROUP BY r.currency
     """)
     params = {
         "property_id": property_id,
         "tenant_id": tenant_id,
-        "month": month,
         "period_start": datetime(year, month, 1) if month else None,
         "period_end": datetime(year + (month == 12), 1 if month == 12 else month + 1, 1) if month else None,
     }
