@@ -56,6 +56,12 @@ Finally, the total was converted from a database decimal to a Python float befor
 
 **Fix:** Nginx now proxies `/api` to FastAPI. The local session also records the expiry from the challenge JWT and validates the existing token when a refresh is requested, so a page reload keeps a valid local session instead of treating it as an incomplete Supabase session.
 
+### Profile settings could be viewed but not saved locally
+
+**Root cause:** The profile page used fallback values when Supabase was unavailable, but its save, preference, notification, and avatar routes still tried to write to Supabase tables and storage. Those resources do not exist in the local challenge setup.
+
+**Fix:** Profile data now lives in the local Postgres database. The API creates the required records for each local user, saves profile and preference changes there, provides default notification categories, and stores resized avatars with the profile data. This keeps every profile action available without creating a Supabase project.
+
 ## Validation completed
 
 I ran the backend syntax check, checked fixed-decimal rounding values, and built the frontend successfully with Vite. The repository-wide frontend lint command still reports a large number of existing issues outside this change, so it is not currently a useful pass/fail check for the dashboard work.

@@ -34,3 +34,44 @@ CREATE TABLE reservations (
 -- RLS Policies (Simulation)
 ALTER TABLE properties ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reservations ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE user_profiles (
+    user_id TEXT PRIMARY KEY,
+    display_name TEXT,
+    bio TEXT,
+    phone TEXT,
+    department TEXT,
+    job_title TEXT,
+    location TEXT,
+    timezone TEXT NOT NULL DEFAULT 'UTC',
+    language TEXT NOT NULL DEFAULT 'en',
+    theme TEXT NOT NULL DEFAULT 'light',
+    avatar_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE user_preferences (
+    user_id TEXT PRIMARY KEY,
+    notification_email BOOLEAN NOT NULL DEFAULT TRUE,
+    notification_push BOOLEAN NOT NULL DEFAULT TRUE,
+    notification_desktop BOOLEAN NOT NULL DEFAULT TRUE,
+    notification_sound BOOLEAN NOT NULL DEFAULT TRUE,
+    auto_refresh BOOLEAN NOT NULL DEFAULT TRUE,
+    compact_view BOOLEAN NOT NULL DEFAULT FALSE,
+    sidebar_collapsed BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE notification_preferences (
+    user_id TEXT NOT NULL,
+    category TEXT NOT NULL,
+    email_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    push_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    desktop_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    sound_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, category)
+);
