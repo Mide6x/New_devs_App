@@ -50,6 +50,12 @@ Finally, the total was converted from a database decimal to a Python float befor
 
 **Fix:** The async engine now uses SQLAlchemy's own async-compatible pool. The monthly date condition was also made explicit in the query instead of relying on a nullable SQL parameter whose type PostgreSQL would have to guess.
 
+### Profile page failing even though the request said 200
+
+**Root cause:** The frontend container did not forward `/api` requests to the backend. Nginx served the single-page app HTML for the profile request instead, which explains the misleading 200 response and the profile page failing to read its data.
+
+**Fix:** Nginx now proxies `/api` to FastAPI. The local session also records the expiry from the challenge JWT and validates the existing token when a refresh is requested, so a page reload keeps a valid local session instead of treating it as an incomplete Supabase session.
+
 ## Validation completed
 
 I ran the backend syntax check, checked fixed-decimal rounding values, and built the frontend successfully with Vite. The repository-wide frontend lint command still reports a large number of existing issues outside this change, so it is not currently a useful pass/fail check for the dashboard work.

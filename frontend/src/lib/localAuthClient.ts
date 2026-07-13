@@ -11,11 +11,12 @@ interface AuthUser {
 }
 
 interface AuthSession {
-  access_token: string;
-  refresh_token?: string;
-  user: AuthUser;
-  token_type: string;
-  expires_in?: number;
+    access_token: string;
+    refresh_token?: string;
+    user: AuthUser;
+    token_type: string;
+    expires_in?: number;
+    expires_at?: number;
 }
 
 interface AuthResponse {
@@ -100,6 +101,7 @@ class LocalAuthClient {
         access_token: data.access_token,
         token_type: data.token_type || 'bearer',
         user: data.user,
+        expires_at: this.getTokenExpiry(data.access_token),
       };
 
       this.saveSession(session);
@@ -144,7 +146,7 @@ class LocalAuthClient {
     }
   }
 
-  async getSession(): Promise<{ data: { session: AuthSession | null } }> {
+  async getSession(): Promise<{ data: { session: AuthSession | null }, error: Error | null }> {
     // Check if current session is still valid
     if (this.session?.access_token) {
       try {
@@ -156,7 +158,7 @@ class LocalAuthClient {
         });
 
         if (response.ok) {
-          return { data: { session: this.session } };
+          return { data: { session: this.session }, error: null };
         } else {
           // Session invalid, clear it
           this.saveSession(null);
@@ -167,7 +169,21 @@ class LocalAuthClient {
       }
     }
 
-    return { data: { session: null } };
+    return { data: { session: null }, error: null };
+  }
+
+  async refreshSession(): Promise<{ data: { session: AuthSession | null }, error: Error | null }> {
+    const { data: { session } } = await this.getSession();
+    return { data: { session }, error: session ? null : new Error('Session is no longer valid') };
+  }
+
+  private getTokenExpiry(token: string): number | undefined {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return typeof payload.exp === 'number' ? payload.exp : undefined;
+    } catch {
+      return undefined;
+    }
   }
 
   async getUser(token?: string): Promise<{ user: AuthUser | null }> {
@@ -238,6 +254,7 @@ class LocalAuthClient {
       getSession: this.getSession.bind(this),
       getUser: this.getUser.bind(this),
       setSession: this.setSession.bind(this),
+      refreshSession: this.refreshSession.bind(this),
       onAuthStateChange: this.onAuthStateChange.bind(this),
     };
   }
