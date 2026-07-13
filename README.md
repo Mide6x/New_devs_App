@@ -38,6 +38,18 @@ Finally, the total was converted from a database decimal to a Python float befor
 
 **Fix:** The pool now uses the configured `DATABASE_URL`, initializes once, and returns a usable async session. The hard-coded fallback figures were removed so a database failure cannot look like real revenue.
 
+### Local backend build timing out
+
+**Root cause:** The backend image installed Python packages with pip's default network timeout. A slow response from PyPI could stop the Docker build even though nothing in the application was wrong.
+
+**Fix:** The Docker build now gives pip a longer timeout and five retries. A temporary download problem should no longer mean starting the build from scratch.
+
+### Dashboard failing after login
+
+**Root cause:** The first database-pool version still passed SQLAlchemy's synchronous `QueuePool` to an async engine. SQLAlchemy rejects that combination, so the dashboard could authenticate successfully but then fail when it tried to load revenue.
+
+**Fix:** The async engine now uses SQLAlchemy's own async-compatible pool. The monthly date condition was also made explicit in the query instead of relying on a nullable SQL parameter whose type PostgreSQL would have to guess.
+
 ## Validation completed
 
 I ran the backend syntax check, checked fixed-decimal rounding values, and built the frontend successfully with Vite. The repository-wide frontend lint command still reports a large number of existing issues outside this change, so it is not currently a useful pass/fail check for the dashboard work.
