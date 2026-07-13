@@ -2,6 +2,13 @@
 
 This was a focused debugging pass on the revenue dashboard. I kept the changes close to the existing structure rather than rebuilding the application.
 
+## Submission links
+
+- Forked repository: https://github.com/Mide6x/New_devs_App
+- Loom walkthrough: https://www.loom.com/share/b28a9b367ec44c1d8614ea88924c0638
+
+The Loom recording ends at five minutes because it was recorded on Loom's free plan. It covers the investigation, the main fixes, and the local verification flow before the recording limit is reached.
+
 ## What I found
 
 The two client reports pointed to separate issues, although they both came from the same revenue request path.
