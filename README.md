@@ -62,6 +62,12 @@ Finally, the total was converted from a database decimal to a Python float befor
 
 **Fix:** Profile data now lives in the local Postgres database. The API creates the required records for each local user, saves profile and preference changes there, provides default notification categories, and stores resized avatars with the profile data. This keeps every profile action available without creating a Supabase project.
 
+### Property names from another tenant appeared in the dashboard selector
+
+**Root cause:** The dashboard property selector was a single static list. The revenue endpoint did not return another tenant's figures, but the selector still exposed property names that did not belong to the signed-in client.
+
+**Fix:** The dashboard now filters properties from the authenticated user's tenant context. Sunset Properties sees only its three properties and Ocean Rentals sees only its two properties, including after a page refresh.
+
 ## Validation completed
 
 I ran the backend syntax check, checked fixed-decimal rounding values, and built the frontend successfully with Vite. The repository-wide frontend lint command still reports a large number of existing issues outside this change, so it is not currently a useful pass/fail check for the dashboard work.

@@ -100,7 +100,10 @@ class LocalAuthClient {
       const session: AuthSession = {
         access_token: data.access_token,
         token_type: data.token_type || 'bearer',
-        user: data.user,
+        user: {
+          ...data.user,
+          app_metadata: { ...data.user.app_metadata, tenant_id: data.user.tenant_id },
+        },
         expires_at: this.getTokenExpiry(data.access_token),
       };
 
